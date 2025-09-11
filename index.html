@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Shop - POS</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .products, .cart {
+      width: 48%;
+      background: #fff;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .product {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      background: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 6px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .quantity-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .total {
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    .clear-btn {
+      margin-top: 10px;
+      width: 100%;
+      background: #dc3545;
+    }
+
+    .clear-btn:hover {
+      background: #a71d2a;
+    }
+
+    .checkout-form {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .checkout-form h3 {
+      margin-bottom: 10px;
+    }
+
+    .checkout-form input, .checkout-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .checkout-form button {
+      width: 100%;
+      background: #28a745;
+    }
+
+    .checkout-form button:hover {
+      background: #1e7e34;
+    }
+
+    #order-summary {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ffe9;
+      border: 1px solid #28a745;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Kathu online Shop - Nuu branch</h1>
+
+  <div class="container">
+    <!-- Products Section -->
+    <div class="products">
+      <h2>Products</h2>
+      <div class="product">
+        <span>Apple - Ksh 120</span>
+        <button onclick="addToCart('Apple', 120)">Add</button>
+      </div>
+      <div class="product">
+        <span>Banana - Ksh 60</span>
+        <button onclick="addToCart('Banana', 60)">Add</button>
+      </div>
+      <div class="product">
+        <span>Milk - Ksh 200</span>
+        <button onclick="addToCart('Milk', 200)">Add</button>
+      </div>
+      <div class="product">
+        <span>Bread - Ksh 150</span>
+        <button onclick="addToCart('Bread', 150)">Add</button>
+      </div>
+    </div>
+
+    <!-- Cart Section -->
+    <div class="cart">
+      <h2>Cart</h2>
+      <div id="cart-items"></div>
+      <div class="total">Total: Ksh <span id="total">0</span></div>
+      <button class="clear-btn" onclick="clearCart()">Clear Cart</button>
+    </div>
+  </div>
+
+  <!-- Checkout Form -->
+  <div class="checkout-form">
+    <h3>Checkout</h3>
+    <input type="text" id="customer-name" placeholder="First Name">
+    <input type="text" id="customer-name"placeholder="Last Name">
+    <input type="email" id="customer-email" placeholder="Email Address">
+    <input type="text" id="customer-address" placeholder="Delivery Address">
+    
+    <label for="payment-method">Payment Method:</label>
+    <select id="payment-method">
+      <option value="">-- Select Payment --</option>
+      <option value="mpesa">M-Pesa</option>
+      <option value="paypal">PayPal</option>
+      <option value="card">Credit/Debit Card</option>
+    </select>
+
+    <button id="checkout-btn">Proceed to Payment</button>
+  </div>
+
+  <!-- Order Summary -->
+  <div id="order-summary" style="display:none;"></div>
+
+  <!-- Firebase v8 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNAycuVcqFTkXCaypzhFeVKnECI6H3Sik",
+      authDomain: "online-2c1b5.firebaseapp.com",
+      databaseURL: "https://online-2c1b5-default-rtdb.firebaseio.com",
+      projectId: "online-2c1b5",
+      storageBucket: "online-2c1b5.appspot.com",
+      messagingSenderId: "941999625032",
+      appId: "1:941999625032:web:059e7d354cf412be05d97d",
+      measurementId: "G-PMR6DJ9VWL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    let cart = [];
+
+    function addToCart(name, price) {
+      let item = cart.find(product => product.name === name);
+      if (item) {
+        item.quantity += 1;
+      } else {
+        cart.push({ name, price, quantity: 1 });
+      }
+      updateCart();
+    }
+
+    function decreaseQuantity(name) {
+      let item = cart.find(product => product.name === name);
+      if (item && item.quantity > 1) {
+        item.quantity -= 1;
+      } else {
+        removeFromCart(name);
+      }
+      updateCart();
+    }
+
+    function removeFromCart(name) {
+      cart = cart.filter(product => product.name !== name);
+      updateCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartItemsDiv = document.getElementById("cart-items");
+      const totalSpan = document.getElementById("total");
+      
+      cartItemsDiv.innerHTML = "";
+      let total = 0;
+
+      cart.forEach(product => {
+        total += product.price * product.quantity;
+
+        const div = document.createElement("div");
+        div.classList.add("cart-item");
+        div.innerHTML = `
+          <span>${product.name} (x${product.quantity}) - Ksh ${(product.price * product.quantity).toFixed(2)}</span>
+          <div class="quantity-controls">
+            <button onclick="addToCart('${product.name}', ${product.price})">+</button>
+            <button onclick="decreaseQuantity('${product.name}')">-</button>
+            <button onclick="removeFromCart('${product.name}')">Remove</button>
+          </div>
+        `;
+        cartItemsDiv.appendChild(div);
+      });
+
+      totalSpan.textContent = total.toFixed(2);
+    }
+
+    function saveOrder(name, email, address, payment, items) {
+      const orderRef = database.ref("orders").push();
+      orderRef.set({
+        customer: name,
+        email: email,
+        address: address,
+        payment: payment,
+        items: items,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    document.getElementById("checkout-btn").addEventListener("click", function() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const name = document.getElementById("customer-name").value;
+      const email = document.getElementById("customer-email").value;
+      const address = document.getElementById("customer-address").value;
+      const payment = document.getElementById("payment-method").value;
+
+      if (!name || !email || !address || !payment) {
+        alert("Please fill all details and select payment method.");
+        return;
+      }
+
+      saveOrder(name, email, address, payment, cart);
+
+      let summary = `<h3>Order Summary</h3>`;
+      summary += `<p><b>Name:</b> ${name}</p>`;
+      summary += `<p><b>Email:</b> ${email}</p>`;
+      summary += `<p><b>Address:</b> ${address}</p>`;
+      summary += `<p><b>Payment Method:</b> ${payment.toUpperCase()}</p>`;
+      summary += `<ul>`;
+      let total = 0;
+      cart.forEach(product => {
+        summary += `<li>${product.name} (x${product.quantity}) - Ksh ${(product.price * product.quantity).toFixed(2)}</li>`;
+        total += product.price * product.quantity;
+      });
+      summary += `</ul>`;
+      summary += `<p><b>Total:</b> Ksh ${total.toFixed(2)}</p>`;
+      summary += `<p style="color:green;font-weight:bold;">Order saved successfully ✔</p>`;
+
+      document.getElementById("order-summary").innerHTML = summary;
+      document.getElementById("order-summary").style.display = "block";
+
+      clearCart();
+    });
+  </script>
+</body>
+</html>
