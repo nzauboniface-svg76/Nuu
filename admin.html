@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard - Orders</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f1f1f1;
+    }
+
+    .items-list {
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Dashboard - Orders</h1>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Customer</th>
+        <th>Email</th>
+        <th>Address</th>
+        <th>Payment</th>
+        <th>Items</th>
+        <th>Timestamp</th>
+      </tr>
+    </thead>
+    <tbody id="orders-table">
+      <!-- Orders will load here -->
+    </tbody>
+  </table>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <script>
+    // Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCNAycuVcqFTkXCaypzhFeVKnECI6H3Sik",
+      authDomain: "online-2c1b5.firebaseapp.com",
+      databaseURL: "https://online-2c1b5-default-rtdb.firebaseio.com",
+      projectId: "online-2c1b5",
+      storageBucket: "online-2c1b5.appspot.com",
+      messagingSenderId: "941999625032",
+      appId: "1:941999625032:web:059e7d354cf412be05d97d",
+      measurementId: "G-PMR6DJ9VWL"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Reference to "orders"
+    const ordersRef = database.ref("orders");
+
+    // Listen for new orders
+    ordersRef.on("value", snapshot => {
+      const ordersTable = document.getElementById("orders-table");
+      ordersTable.innerHTML = ""; // clear old data
+
+      snapshot.forEach(orderSnapshot => {
+        const order = orderSnapshot.val();
+
+        // Convert items array to readable list
+        let itemsHTML = "<ul class='items-list'>";
+        order.items.forEach(item => {
+          itemsHTML += `<li>${item.name} (x${item.quantity}) - Ksh ${(item.price * item.quantity).toFixed(2)}</li>`;
+        });
+        itemsHTML += "</ul>";
+
+        // Add row to table
+        const row = `
+          <tr>
+            <td>${order.customer}</td>
+            <td>${order.email}</td>
+            <td>${order.address}</td>
+            <td>${order.payment.toUpperCase()}</td>
+            <td>${itemsHTML}</td>
+            <td>${new Date(order.timestamp).toLocaleString()}</td>
+          </tr>
+        `;
+        ordersTable.innerHTML += row;
+      });
+    });
+  </script>
+
+</body>
+</html>
