@@ -159,23 +159,22 @@
   </div>
 
   <!-- Checkout Form -->
-  <div class="checkout-form">
+  <form class="checkout-form" method="POST" id="checkout-form">
+    {% csrf_token %}
     <h3>Checkout</h3>
-    <input type="text" id="customer-name" placeholder="First Name">
-    <input type="text" id="customer-name"placeholder="Last Name">
-    <input type="email" id="customer-email" placeholder="Email Address">
-    <input type="text" id="customer-address" placeholder="Delivery Address">
-    
+    <input type="text" name="customer" id="customer-name" placeholder="Full Name" required>
+    <input type="email" name="email" id="customer-email" placeholder="Email Address" required>
+    <input type="text" name="address" id="customer-address" placeholder="Delivery Address" required>
     <label for="payment-method">Payment Method:</label>
-    <select id="payment-method">
+    <select name="payment" id="payment-method" required>
       <option value="">-- Select Payment --</option>
       <option value="mpesa">M-Pesa</option>
       <option value="paypal">PayPal</option>
       <option value="card">Credit/Debit Card</option>
     </select>
-
-    <button id="checkout-btn">Proceed to Payment</button>
-  </div>
+    <input type="hidden" name="items" id="cart-items-json">
+    <button type="submit" id="checkout-btn">Proceed to Payment</button>
+  </form>
 
   <!-- Order Summary -->
   <div id="order-summary" style="display:none;"></div>
@@ -271,43 +270,14 @@
       });
     }
 
-    document.getElementById("checkout-btn").addEventListener("click", function() {
+    document.getElementById("checkout-form").addEventListener("submit", function(e) {
       if (cart.length === 0) {
         alert("Your cart is empty!");
+        e.preventDefault();
         return;
       }
-
-      const name = document.getElementById("customer-name").value;
-      const email = document.getElementById("customer-email").value;
-      const address = document.getElementById("customer-address").value;
-      const payment = document.getElementById("payment-method").value;
-
-      if (!name || !email || !address || !payment) {
-        alert("Please fill all details and select payment method.");
-        return;
-      }
-
-      saveOrder(name, email, address, payment, cart);
-
-      let summary = `<h3>Order Summary</h3>`;
-      summary += `<p><b>Name:</b> ${name}</p>`;
-      summary += `<p><b>Email:</b> ${email}</p>`;
-      summary += `<p><b>Address:</b> ${address}</p>`;
-      summary += `<p><b>Payment Method:</b> ${payment.toUpperCase()}</p>`;
-      summary += `<ul>`;
-      let total = 0;
-      cart.forEach(product => {
-        summary += `<li>${product.name} (x${product.quantity}) - Ksh ${(product.price * product.quantity).toFixed(2)}</li>`;
-        total += product.price * product.quantity;
-      });
-      summary += `</ul>`;
-      summary += `<p><b>Total:</b> Ksh ${total.toFixed(2)}</p>`;
-      summary += `<p style="color:green;font-weight:bold;">Order saved successfully ✔</p>`;
-
-      document.getElementById("order-summary").innerHTML = summary;
-      document.getElementById("order-summary").style.display = "block";
-
-      clearCart();
+      // Save cart as JSON string in hidden field
+      document.getElementById("cart-items-json").value = JSON.stringify(cart);
     });
   </script>
 </body>
