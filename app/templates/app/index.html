@@ -132,20 +132,36 @@
     <div class="products">
       <h2>Products</h2>
       <div class="product">
-        <span>Apple - Ksh 120</span>
-        <button onclick="addToCart('Apple', 120)">Add</button>
+        <span>Apple - Ksh you 40</span>
+        <button onclick="addToCart('Apple', 40)">Add</button>
       </div>
       <div class="product">
-        <span>Banana - Ksh 60</span>
-        <button onclick="addToCart('Banana', 60)">Add</button>
+        <span>Banana - Ksh 20</span>
+        <button onclick="addToCart('Banana', 20)">Add</button>
       </div>
       <div class="product">
-        <span>Milk - Ksh 200</span>
-        <button onclick="addToCart('Milk', 200)">Add</button>
+        <span>Milk - Ksh 60</span>
+        <button onclick="addToCart('Milk', 60)">Add</button>
       </div>
       <div class="product">
-        <span>Bread - Ksh 150</span>
-        <button onclick="addToCart('Bread', 150)">Add</button>
+        <span>Bread - Ksh 75</span>
+        <button onclick="addToCart('Bread', 75)">Add</button>
+      </div>
+      <div class="product">
+        <span>Eggs (dozen) - Ksh 150</span>
+        <button onclick="addToCart('Eggs', 150)">Add</button>
+      </div>
+      <div class="product">
+        <span>Cheese - Ksh 200</span>
+        <button onclick="addToacart('Cheese', 200)">Add</button>"
+      </div>
+      <div class="product">
+        <span>Chicken - Ksh 500</span>
+        <button onclick="addToCart('Chicken', 500)">Add</button>
+      </div>
+      <div class="product">
+        <span>Rice (1kg) - Ksh 130</span>
+        <button onclick="addToCart('Rice', 130)">Add</button>"
       </div>
     </div>
 
@@ -171,6 +187,8 @@
       <option value="mpesa">M-Pesa</option>
       <option value="paypal">PayPal</option>
       <option value="card">Credit/Debit Card</option>
+      <option value="Cash">Cash on Delivery</option>
+      </option>
     </select>
     <input type="hidden" name="items" id="cart-items-json">
     <button type="submit" id="checkout-btn">Proceed to Payment</button>
