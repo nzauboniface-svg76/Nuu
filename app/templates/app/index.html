@@ -195,7 +195,27 @@
   </form>
 
   <!-- Order Summary -->
-  <div id="order-summary" style="display:none;"></div>
+  {% if order_summary %}
+  <div id="order-summary" style="background:#e9ffe9;border:1px solid #28a745;border-radius:12px;padding:15px;margin-top:20px;position:relative;">
+    <button type="button" onclick="document.getElementById('order-summary').style.display='none'"
+      style="position:absolute;top:10px;right:10px;background:#28a745;color:white;border:none;border-radius:50%;width:32px;height:32px;font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:background 0.2s;"
+      onmouseover="this.style.background='#218838';"
+      onmouseout="this.style.background='#28a745';"
+    >&times;</button>
+    <h3>Order Summary</h3>
+    <p><b>Name:</b> {{ order_summary.customer }}</p>
+    <p><b>Email:</b> {{ order_summary.email }}</p>
+    <p><b>Address:</b> {{ order_summary.address }}</p>
+    <p><b>Payment Method:</b> {{ order_summary.payment|title }}</p>
+    <ul>
+      {% for item in order_summary.items %}
+        <li>{{ item.name }} (x{{ item.quantity }}) - Ksh {{ item.price|floatformat:2 }}</li>
+      {% endfor %}
+    </ul>
+    <p><b>Total:</b> Ksh {{ order_summary.total|floatformat:2 }}</p>
+    <p style="color:green;font-weight:bold;">Order saved successfully ✔</p>
+  </div>
+  {% endif %}
 
   <!-- Firebase v8 SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
